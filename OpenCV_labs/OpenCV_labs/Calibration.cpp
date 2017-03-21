@@ -8,7 +8,7 @@ using namespace cv;
 // Hit ‘p’ to pause/unpause, ESC to quit
 
 int Calibration(int argc, char* argv[]) {
-	if (argc != 4) {
+	if (argc != 5) {
 		printf("ERROR: Wrong number of input parameters\n");
 		return -1;
 	}
@@ -21,11 +21,12 @@ int Calibration(int argc, char* argv[]) {
 	board_w = atoi(argv[1]);
 	board_h = atoi(argv[2]);
 	readStringList(argv[3], images_list);
+	int percent = atoi(argv[4]);
 	vector<string> images_list2(images_list);
 
 	int board_n = board_w * board_h;
 	CvSize board_sz = cvSize(board_w, board_h);
-	cvNamedWindow("Calibration");
+	cvNamedWindow("Calibration", CV_WINDOW_NORMAL);
 	//ALLOCATE STORAGE
 	CvMat* image_points = cvCreateMat(images_list.size()*board_n, 2, CV_32FC1);
 	CvMat* object_points = cvCreateMat(images_list.size()*board_n, 3, CV_32FC1);
@@ -39,25 +40,37 @@ int Calibration(int argc, char* argv[]) {
 
 
 	IplImage* image;
+	CvSize size;
+
 
 
 	while (images_list.size() > 0) {
-
-		image = cvLoadImage((ExePath() + images_list.back()).c_str(), CV_LOAD_IMAGE_COLOR);
+		IplImage* image_src = cvLoadImage((ExePath() + images_list.back()).c_str(), CV_LOAD_IMAGE_UNCHANGED);
 		images_list.pop_back();
+		//use cvResize to resize source to a destination image
+		image = cvCreateImage
+		(cvSize((int)((image_src->width*percent) / 100), (int)((image_src->height*percent) / 100)),
+			image_src->depth, image_src->nChannels);
+		cvResize(image_src, image);
+		cvReleaseImage(&image_src);
+		size = cvGetSize(image);
+
+		//Get Subpixel accuracy on those corners
+		IplImage *gray_image = cvCreateImage(size, 8, 1);
+		cvCvtColor(image, gray_image, CV_BGR2GRAY);
 		//Find chessboard corners:
 		int found = cvFindChessboardCorners(
-			image, board_sz, corners, &corner_count,
+			gray_image, board_sz, corners, &corner_count,
 			CV_CALIB_CB_ADAPTIVE_THRESH | CV_CALIB_CB_FILTER_QUADS
 		);
-		//Get Subpixel accuracy on those corners
-		IplImage *gray_image = cvCreateImage(cvGetSize(image), 8, 1);//subpixel
+		//subpixel
 		cvFindCornerSubPix(gray_image, corners, corner_count,
 			cvSize(11, 11), cvSize(-1, -1), cvTermCriteria(
 				CV_TERMCRIT_EPS + CV_TERMCRIT_ITER, 30, 0.1));
 		//Draw it
 		cvDrawChessboardCorners(image, board_sz, corners, corner_count, found);
 		cvShowImage("Calibration", image);
+		resizeWindow("Calibration", 500, 500);
 		// If we got a good board, add it to our data
 		if (corner_count == board_n) {
 			step = successes*board_n;
@@ -71,6 +84,8 @@ int Calibration(int argc, char* argv[]) {
 			CV_MAT_ELEM(*point_counts, int, successes, 0) = board_n;
 			successes++;
 		}
+
+		cvReleaseImage(&image);
 
 		int c = cvWaitKey(15);
 		if (c == 'p') {
@@ -122,7 +137,7 @@ int Calibration(int argc, char* argv[]) {
 	//CALIBRATE THE CAMERA!
 	cvCalibrateCamera2(
 		object_points2, image_points2,
-		point_counts2, cvGetSize(image),
+		point_counts2, size,
 		intrinsic_matrix, distortion_coeffs,
 		NULL, NULL, 0 //CV_CALIB_FIX_ASPECT_RATIO
 	);
@@ -133,36 +148,56 @@ int Calibration(int argc, char* argv[]) {
 	// EXAMPLE OF LOADING THESE MATRICES BACK IN:
 	//CvMat *intrinsic = (CvMat*)cvLoad("Intrinsics.xml");
 	//CvMat *distortion = (CvMat*)cvLoad("Distortion.xml");
-	// Build the undistort map that we will use for all
-	// subsequent frames.
-	//
-	IplImage* mapx = cvCreateImage(cvGetSize(image), IPL_DEPTH_32F, 1);
-	IplImage* mapy = cvCreateImage(cvGetSize(image), IPL_DEPTH_32F, 1);
-	cvInitUndistortMap(
-		intrinsic_matrix,
-		distortion_coeffs,
-		mapx,
-		mapy
-	);
+
 	// Just run the camera to the screen, now showing the raw and
 	// the undistorted image.
 	//
 	CreateDirectoryA((ExePath() + "undistorted\\").c_str(), NULL);
-	cvNamedWindow("Undistort");
-	while (images_list2.size() > 0) {
-		string dirname = images_list2.back();
-		IplImage* t = cvLoadImage((ExePath() + dirname).c_str(), CV_LOAD_IMAGE_COLOR);
-		images_list2.pop_back();
+	cvNamedWindow("Undistort", CV_WINDOW_NORMAL);
 
-		cvShowImage("Calibration", t); // Show raw image
-		cvRemap(t, image, mapx, mapy); // Undistort image
-		cvReleaseImage(&t);
-		cvShowImage("Undistort", image); // Show corrected image
-										 //Handle pause/unpause and ESC
+	while (images_list2.size() > 0) {
+		//load image
+		string dirname = images_list2.back();
+		IplImage* image_src = cvLoadImage((ExePath() + dirname).c_str(), CV_LOAD_IMAGE_COLOR);
+		images_list2.pop_back();
+		//use cvResize to resize source to a destination image
+		IplImage* image = cvCreateImage
+		(cvSize((int)((image_src->width*percent) / 100), (int)((image_src->height*percent) / 100)),
+			image_src->depth, image_src->nChannels);
+		cvResize(image_src, image);
+		size = cvGetSize(image);
+		cvReleaseImage(&image_src);
+
+		// Build the undistort map that we will use for all
+		// subsequent frames.
+		//
+		IplImage* mapx = cvCreateImage(size, IPL_DEPTH_32F, 1);
+		IplImage* mapy = cvCreateImage(size, IPL_DEPTH_32F, 1);
+		cvInitUndistortMap(
+			intrinsic_matrix,
+			distortion_coeffs,
+			mapx,
+			mapy
+		);
+
+		//Show
+		cvShowImage("Calibration", image); // Show raw image
+		resizeWindow("Calibration", 500, 500);
+		IplImage* image_dst = cvCreateImage(size, image->depth, image->nChannels);
+		cvRemap(image, image_dst, mapx, mapy, CV_INTER_LINEAR); // Undistort image
+		
+		cvShowImage("Undistort", image_dst); // Show corrected image
+		resizeWindow("Undistort", 500, 500);
+		//Handle pause/unpause and ESC
 
 		int last = dirname.find_last_of("\\") + 1;
 		string name = dirname.substr(last, dirname.length() - last);
-		cvSaveImage((ExePath() + "undistorted\\" + name).c_str(), image);
+		cvSaveImage((ExePath() + "undistorted\\" + name).c_str(), image_dst);
+
+		cvReleaseImage(&mapx);
+		cvReleaseImage(&mapy);
+		cvReleaseImage(&image);
+		cvReleaseImage(&image_dst);
 
 		int c = cvWaitKey(15);
 		if (c == 'p') {
