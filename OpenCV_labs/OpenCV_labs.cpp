@@ -15,7 +15,7 @@ int main(int argc, char* argv[])
 	cout << "2. Rectification: board_w=14, board_h=10, intrinsic=file.xml, distortion=file.xml, image=file.png\n";
 	cout << "3. FundamentalEpilines: image1=file.png, image2=file.png, [corners1=file.xml, corners2=file.xml]\n";
 	cout << "4. Pano: image1=file.png, image2=file.png, threashold=1000\n";
-	cout << "5. StereoDepth: image1=file.png, image2=file.png, threashold=1000\n";
+	cout << "5. StereoDepth: image1=file.png, image2=file.png, threashold=1000, window=21\n";
 
 	char key;
 	cin >> key;

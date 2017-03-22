@@ -10,7 +10,7 @@ void FindStereoCorners(int threshold, Mat image_gray1, Mat image_gray2, vector<P
 	//-- Step 1: Detect the keypoints using SURF Detector
 	vector<KeyPoint> keypoints1, keypoints2;
 	Mat descriptors1, descriptors2;
-	SurfFeatureDetector detector(threshold);
+	SiftFeatureDetector detector(threshold);
 	detector.detect(image_gray1, keypoints1);
 	detector.detect(image_gray2, keypoints2);
 
