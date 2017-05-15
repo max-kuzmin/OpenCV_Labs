@@ -8,8 +8,6 @@ int count1 = 0, count2 = 0;
 Mat2f corners1, corners2;
 Mat image1, image2;
 
-
-
 /**
 * \brief Compute and draw the epipolar lines in two images
 *      associated to each other by a fundamental matrix

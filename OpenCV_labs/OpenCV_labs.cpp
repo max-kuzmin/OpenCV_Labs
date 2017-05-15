@@ -4,6 +4,8 @@
 #include "FundamentalEpilines.h"
 #include "Pano.h"
 #include "StereoDepth.h"
+#include "Segmentation.h"
+#include "BackgroundExtraction.h"
 
 using namespace std;
 using namespace cv;
@@ -14,8 +16,10 @@ int main(int argc, char* argv[])
 	cout << "1. Calibration: board_w=14, board_h=10, images_list_file=imgs.xml, percent=50\n";
 	cout << "2. Rectification: board_w=14, board_h=10, intrinsic=file.xml, distortion=file.xml, image=file.png\n";
 	cout << "3. FundamentalEpilines: image1=file.png, image2=file.png, [corners1=file.xml, corners2=file.xml]\n";
-	cout << "4. Pano: image1=file.png, image2=file.png, threashold=1000\n";
-	cout << "5. StereoDepth: image1=file.png, image2=file.png, threashold=1000, window=21\n";
+	cout << "4. Pano: image1=file.png, image2=file.png, threshold=1000\n";
+	cout << "5. StereoDepth: image1=file.png, image2=file.png, threshold=1000, window=21\n";
+	cout << "6. Segmentation: image1=file.png, thresh=0.4\n";
+	cout << "7. BackgroundExtraction: -vid <video filename> |-img <image filename> \n";
 
 	char key;
 	cin >> key;
@@ -35,6 +39,12 @@ int main(int argc, char* argv[])
 		break;
 	case '5':
 		StereoDepth(argc, argv);
+		break;
+	case '6':
+		Segmentation(argc, argv);
+		break;
+	case '7':
+		BackgroundExtraction(argc, argv);
 		break;
 	default:
 		break;
