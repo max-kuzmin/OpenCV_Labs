@@ -7,3 +7,5 @@
 *.opendb
 *.db
 *.user
+/Debug
+/OpenCV_labs/x64/Debug

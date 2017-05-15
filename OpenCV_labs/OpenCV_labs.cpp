@@ -6,6 +6,7 @@
 #include "StereoDepth.h"
 #include "Segmentation.h"
 #include "BackgroundExtraction.h"
+#include "FaceDetection.h"
 
 using namespace std;
 using namespace cv;
@@ -20,6 +21,7 @@ int main(int argc, char* argv[])
 	cout << "5. StereoDepth: image1=file.png, image2=file.png, threshold=1000, window=21\n";
 	cout << "6. Segmentation: image1=file.png, thresh=0.4\n";
 	cout << "7. BackgroundExtraction: -vid <video filename> |-img <image filename> \n";
+	cout << "8. FaceDetection: -face=haarcascade_frontalface_alt.xml -eyes=haarcascade_eye_tree_eyeglasses.xml\n";
 
 	char key;
 	cin >> key;
@@ -45,6 +47,9 @@ int main(int argc, char* argv[])
 		break;
 	case '7':
 		BackgroundExtraction(argc, argv);
+		break;
+	case '8':
+		FaceDetection(argc, argv);
 		break;
 	default:
 		break;
