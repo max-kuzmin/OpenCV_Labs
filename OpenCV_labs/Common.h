@@ -1,5 +1,3 @@
-#pragma once
-
 using namespace std;
 
 cv::string ExePath();

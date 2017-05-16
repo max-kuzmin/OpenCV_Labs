@@ -7,7 +7,7 @@ void detectAndDisplay(Mat frame);
 String face_cascade_name, eyes_cascade_name;
 CascadeClassifier face_cascade;
 CascadeClassifier eyes_cascade;
-String window_name = "Capture - Face detection";
+String window_name = "Face detection - Cascade Classifiers";
 
 int FaceDetection(int argc, char* argv[]) {
 	CommandLineParser parser(argc, argv,

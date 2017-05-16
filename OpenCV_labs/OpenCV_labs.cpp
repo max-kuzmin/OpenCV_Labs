@@ -7,6 +7,8 @@
 #include "Segmentation.h"
 #include "BackgroundExtraction.h"
 #include "FaceDetection.h"
+#include "OpticalFlow.h"
+#include "SupportVectorMachine.h"
 
 using namespace std;
 using namespace cv;
@@ -22,6 +24,8 @@ int main(int argc, char* argv[])
 	cout << "6. Segmentation: image1=file.png, thresh=0.4\n";
 	cout << "7. BackgroundExtraction: -vid <video filename> |-img <image filename> \n";
 	cout << "8. FaceDetection: -face=haarcascade_frontalface_alt.xml -eyes=haarcascade_eye_tree_eyeglasses.xml\n";
+	cout << "9. OpticalFlow: [-input=video.flv]\n";
+	cout << "0. SupportVectorMachine: \n";
 
 	char key;
 	cin >> key;
@@ -50,6 +54,12 @@ int main(int argc, char* argv[])
 		break;
 	case '8':
 		FaceDetection(argc, argv);
+		break;
+	case '9':
+		OpticalFlow(argc, argv);
+		break;
+	case '0':
+		SupportVectorMachine(argc, argv);
 		break;
 	default:
 		break;

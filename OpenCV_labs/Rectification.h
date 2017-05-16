@@ -1,3 +1,1 @@
- #pragma once
-
-int Rectification(int argc, char* argv[]);
+ int Rectification(int argc, char* argv[]);
